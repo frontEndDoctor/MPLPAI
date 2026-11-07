@@ -56,19 +56,23 @@ dialog textarea{height:260px;font:12px ui-monospace,Menlo,monospace}
 .tbl{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
 .tbl th,.tbl td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left}
 .scroll{max-height:240px;overflow:auto}
+.blk{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:10px}
 </style>
 </head>
 <body>
 <div class="app">
   <aside class="panel list">
     <input type="text" id="who" placeholder="Your name (used in file name)" aria-label="Annotator name">
-    <button id="defs" style="margin-bottom:12px">Definitions</button>
+    <div class="blk"><button id="defs">Definitions</button></div>
+    <div class="blk"><button id="exp" class="primary">Export CSV</button>
+      <div style="font-size:12.5px;color:var(--mute);margin-top:6px">Click Export CSV only after you have finished annotating, then send the downloaded file to the researcher.</div>
+      <div id="status" style="margin-top:6px"></div></div>
     <h2>Progress</h2>
     <div id="prog"></div>
     <input type="file" id="file" accept=".csv,text/csv" hidden>
   </aside>
 
-  <div style="min-width:0"><main class="panel" id="main"></main><div class="panel" style="margin-top:12px"><button id="exp" class="primary">Export CSV</button><div style="font-size:13px;color:var(--mute);margin-top:6px">Click Export CSV only after you have finished annotating. Check that your name is entered at the top left, then send the downloaded file to the researcher.</div><div id="status" style="margin-top:8px"></div></div></div>
+  <div style="min-width:0"><main class="panel" id="main"></main></div>
 
 </div>
 <div style="max-width:1500px;margin:0 auto;padding:0 12px 24px"><div class="panel" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button id="cmp">Compare annotators</button><span style="font-size:13px;color:var(--mute)">For the researcher only. Annotators do not need this.</span></div></div>
@@ -156,6 +160,7 @@ function renderMain(){
     h+=`</div>`;
   });
   h+=`<div class="cm"><h2>Annotator’s notes</h2><textarea id="notes" placeholder="Explain ambiguous cases and coding decisions">${esc(c.notes)}</textarea></div>`;
+  h+=`<div class="meta" style="margin:14px 0 0"><span>Post ${S.cur+1} of ${S.rows.length}</span><span style="margin-left:auto" class="row"><button data-nav="-1">Prev</button><button data-nav="1" class="primary">Next</button></span></div>`;
   m.innerHTML=h;
 }
 function renderSide(){
