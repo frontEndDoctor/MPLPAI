@@ -57,6 +57,7 @@ dialog textarea{height:260px;font:12px ui-monospace,Menlo,monospace}
 .tbl th,.tbl td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left}
 .scroll{max-height:240px;overflow:auto}
 .blk{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:10px}
+button:disabled{opacity:.5;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -65,6 +66,7 @@ dialog textarea{height:260px;font:12px ui-monospace,Menlo,monospace}
     <input type="text" id="who" placeholder="Your name (used in file name)" aria-label="Annotator name">
     <div class="blk"><button id="defs">Definitions</button></div>
     <div class="blk"><button id="exp" class="primary">Export CSV</button>
+      <div id="expHint" style="font-size:12.5px;color:var(--mute);margin-top:6px">Enter your name above to enable Export CSV.</div>
       <div style="font-size:12.5px;color:var(--mute);margin-top:6px">Click Export CSV only after you have finished annotating, then send the downloaded file to the researcher.</div>
       <div id="status" style="margin-top:6px"></div></div>
     <h2>Progress</h2>
@@ -214,6 +216,7 @@ function buildCSV(){
   return lines.join("\n");
 }
 $("exp").onclick=async()=>{
+  if(!(S.annotator&&S.annotator.trim())){say("Enter your name first.");$("who").focus();return}
   if(!S.rows.length){say("Upload a CSV first.");return}
   const csv=buildCSV();
   try{const dl=await claude.use("downloads");
@@ -266,7 +269,9 @@ function toggle(a,v,multi){const sub=v.length>2,p=v.slice(0,2);
 S.coding.forEach(c=>{c.status=normStatus(c.status||"")});
 function def(id){return S.defs[id]||DEFS2[id]||DEFS[id]||""}
 $("who").value=S.annotator||"";
-$("who").oninput=e=>{S.annotator=e.target.value.trim();save()};
+function updateExp(){const ok=!!(S.annotator&&S.annotator.trim());$("exp").disabled=!ok;$("expHint").style.display=ok?"none":"block"}
+$("who").oninput=e=>{S.annotator=e.target.value.trim();save();updateExp()};
+updateExp();
 
 $("defs").onclick=()=>{
   const all=[...DIMS.flatMap(d=>d.codes.map(([id,l])=>[id,l])),...INTER];
