@@ -63,10 +63,8 @@ dialog textarea{height:260px;font:12px ui-monospace,Menlo,monospace}
   <aside class="panel list">
     <input type="text" id="who" placeholder="Your name (used in file name)" aria-label="Annotator name">
     <button id="defs" style="margin-bottom:12px">Definitions</button>
-    <h2>Posts</h2>
+    <h2>Progress</h2>
     <div id="prog"></div>
-    <label class="row" style="font-size:13px;margin-bottom:8px"><input type="checkbox" id="todo"> Only uncoded</label>
-    <div id="items"></div>
     <input type="file" id="file" accept=".csv,text/csv" hidden>
   </aside>
 
@@ -145,8 +143,6 @@ function render(){renderList();renderMain();renderSide()}
 function renderList(){
   const n=S.rows.length,done=S.coding.filter(complete).length;
   $("prog").innerHTML=n?`<div style="font-size:13px">${done} of ${n} coded</div><div class="bar"><i style="width:${done/n*100}%"></i></div>`:"";
-  const only=$("todo").checked;
-  $("items").innerHTML=S.rows.map((r,i)=>only&&complete(S.coding[i])&&i!==S.cur?"":`<button class="item ${i===S.cur?"cur":""}" data-i="${i}"><span class="t">${i+1}. ${esc((r.text||"").slice(0,40))}</span><span class="ok">${complete(S.coding[i])?"✓":""}</span></button>`).join("");
 }
 function renderMain(){
   const m=$("main");
