@@ -69,6 +69,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
       <div id="expHint" style="font-size:12.5px;color:var(--mute);margin-top:6px">Enter your name above to enable Export CSV.</div>
       <div style="font-size:12.5px;color:var(--mute);margin-top:6px">Click Export CSV only after you have finished annotating, then send the downloaded file to the researcher.</div>
       <div id="status" style="margin-top:6px"></div></div>
+    <div class="blk"><label for="jump" style="font-size:13px;font-weight:600;color:var(--mute)">Go to post</label>
+      <select id="jump" style="width:100%;margin-top:6px"></select></div>
     <h2>Progress</h2>
     <div id="prog"></div>
     <input type="file" id="file" accept=".csv,text/csv" hidden>
@@ -149,6 +151,9 @@ function render(){renderList();renderMain();renderSide()}
 function renderList(){
   const n=S.rows.length,done=S.coding.filter(complete).length;
   $("prog").innerHTML=n?`<div style="font-size:13px">${done} of ${n} coded</div><div class="bar"><i style="width:${done/n*100}%"></i></div>`:"";
+  const sel=$("jump");
+  sel.innerHTML=S.rows.map((r,i)=>`<option value="${i}">${complete(S.coding[i])?"✓ ":""}${i+1}. ${esc(r.platform||"")} · ${esc((r.text||"").replace(/\s+/g," ").slice(0,45))}</option>`).join("");
+  sel.value=String(S.cur);
 }
 function renderMain(){
   const m=$("main");
@@ -190,6 +195,7 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("change",e=>{
   const t=e.target;
+  if(t.id==="jump"){S.cur=+t.value;save();render();window.scrollTo(0,0);return}
   if(t.id==="todo")return renderList();
   if(t.dataset.multi){S.multi[t.dataset.multi]=t.checked;save()}
   if(t.id==="stat"){S.coding[S.cur].status=t.value;save();renderList()}
@@ -265,7 +271,7 @@ I1:"Supports or affirms the parent content’s view.\nExample: “Exactly! AI ha
 I2:"Challenges or contradicts the parent content’s view.\nExample: “I disagree. You still need programming fundamentals.”",
 I3:"Unrelated to the main view, or does not clearly express agreement or disagreement.\nExample: “Where can I download the tool?”",
 I4:"The direction of the comment cannot be ascertained. Judge meaning in context, not by keywords alone."};
-const RULES='<details style="margin-bottom:10px;font-size:13px"><summary style="cursor:pointer;font-weight:600">Key rules from the codebook</summary><ul style="margin:6px 0 0;padding-left:18px;color:var(--mute)"><li>Code only what is explicitly stated. Use Unclear when evidence is insufficient.</li><li>At least one code per dimension. Add the sub-dimension when supported.</li><li>Judge comments in context, not by isolated keywords.</li><li>Explain ambiguous cases in Notes.</li></ul></details>';
+const RULES='<details style="margin-bottom:10px;font-size:13px"><summary style="cursor:pointer;font-weight:600">Key rules from the codebook</summary><ul style="margin:6px 0 0;padding-left:18px;color:var(--mute)"><li>Code only what is explicitly stated. Use Unclear when evidence is insufficient.</li><li>At least one code per dimension. Add the sub-dimension when supported.</li><li>Code every available comment (I1–I4), judging it in context, not by isolated keywords.</li><li>Explain ambiguous cases in Notes.</li></ul></details>';
 function toggle(a,v,multi){const sub=v.length>2,p=v.slice(0,2);
   if(a.includes(v))return sub?a.filter(x=>x!==v):a.filter(x=>x!==v&&!(x.length>2&&x.startsWith(v)));
   if(!multi)return sub?[p,v]:[v];
