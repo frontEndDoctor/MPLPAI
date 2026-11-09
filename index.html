@@ -155,7 +155,7 @@ function renderList(){
   const n=S.rows.length,done=S.coding.filter(complete).length;
   $("prog").innerHTML=n?`<div style="font-size:13px">${done} of ${n} coded</div><div class="bar"><i style="width:${done/n*100}%"></i></div>`:"";
   const sel=$("jump");
-  sel.innerHTML=S.rows.map((r,i)=>`<option value="${i}">${complete(S.coding[i])?"✓ ":""}${esc((r.text||"").replace(/\s+/g," ").slice(0,60))}</option>`).join("");
+  sel.innerHTML=S.rows.map((r,i)=>`<option value="${i}">${complete(S.coding[i])?"✓ ":""}${i+1} — ${esc((r.text||"").replace(/\s+/g," ").slice(0,60))}</option>`).join("");
   sel.value=String(S.cur);
 }
 function renderMain(){
