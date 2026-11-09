@@ -155,14 +155,14 @@ function renderList(){
   const n=S.rows.length,done=S.coding.filter(complete).length;
   $("prog").innerHTML=n?`<div style="font-size:13px">${done} of ${n} coded</div><div class="bar"><i style="width:${done/n*100}%"></i></div>`:"";
   const sel=$("jump");
-  sel.innerHTML=S.rows.map((r,i)=>`<option value="${i}">${complete(S.coding[i])?"✓ ":""}${i+1}. ${esc(r.platform||"")} · ${esc((r.text||"").replace(/\s+/g," ").slice(0,45))}</option>`).join("");
+  sel.innerHTML=S.rows.map((r,i)=>`<option value="${i}">${complete(S.coding[i])?"✓ ":""}${esc((r.text||"").replace(/\s+/g," ").slice(0,60))}</option>`).join("");
   sel.value=String(S.cur);
 }
 function renderMain(){
   const m=$("main");
   if(!S.rows.length){m.innerHTML=`<div class="empty"><h2 style="font-size:18px;color:var(--ink)">Upload your CSV to start coding</h2><p>The file needs a <b>post_text</b> or <b>text</b> column. It can also have platform, top_comment_1–3 and code columns.</p><button class="primary" id="up2">Choose CSV file</button></div>`;return}
   const r=S.rows[S.cur],c=S.coding[S.cur];
-  let h=`<div class="meta"><span class="badge">${esc(r.platform||"—")}</span><span>${esc(r.year||"")}</span>${r.subreddit?`<span>r/${esc(r.subreddit)}</span>`:""}<span>Record ${esc(r.record_id||S.cur+1)} · ${S.cur+1} of ${S.rows.length}</span><span style="margin-left:auto" class="row"><button data-nav="-1">Prev</button><button data-nav="1" class="primary">Next</button></span></div>
+  let h=`<div class="meta">${r.subreddit?`<span>r/${esc(r.subreddit)}</span>`:""}<span style="margin-left:auto" class="row"><button data-nav="-1">Prev</button><button data-nav="1" class="primary">Next</button></span></div>
   <p class="post">${esc(r.text)}</p>
   <div id="dims" style="border-top:1px solid var(--line);padding-top:12px;margin-bottom:4px"></div>`;
   c.ci=c.ci||["","",""];
@@ -173,7 +173,7 @@ function renderMain(){
     h+=`</div>`;
   });
   h+=`<div class="cm"><h2>Annotator’s notes</h2><textarea id="notes" placeholder="Explain ambiguous cases and coding decisions">${esc(c.notes)}</textarea></div>`;
-  h+=`<div class="meta" style="margin:14px 0 0"><span>Record ${S.cur+1} of ${S.rows.length}</span><span style="margin-left:auto" class="row"><button data-nav="-1">Prev</button><button data-nav="1" class="primary">Next</button></span></div>`;
+  h+=`<div class="meta" style="margin:14px 0 0"><span style="margin-left:auto" class="row"><button data-nav="-1">Prev</button><button data-nav="1" class="primary">Next</button></span></div>`;
   m.innerHTML=h;
 }
 function renderSide(){
