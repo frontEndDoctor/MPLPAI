@@ -288,7 +288,7 @@ updateExp();
 
 $("defs").onclick=()=>{
   const all=[...DIMS.flatMap(d=>d.codes.map(([id,l])=>[id,l])),...INTER];
-  $("defList").innerHTML=all.map(([id,l])=>`<div class="dl" style="margin-bottom:12px"><b>${id} ${esc(l)}</b><div style="white-space:pre-line;color:var(--mute)">${esc(def(id))}</div></div>`).join("");
+  $("defList").innerHTML=`<div class="blk" style="font-size:13px;line-height:1.5"><b>Relevance screening</b><div style="color:var(--mute);margin-top:5px">For posts that are totally unrelated to AI or to using AI to learn programming, enter exactly: <b>not related to AI nor AI for learning programming</b>.</div></div>`+all.map(([id,l])=>`<div class="dl" style="margin-bottom:12px"><b>${id} ${esc(l)}</b><div style="white-space:pre-line;color:var(--mute)">${esc(def(id))}</div></div>`).join("");
   $("defDlg").showModal();
 };
 $("defClose").onclick=()=>$("defDlg").close();
