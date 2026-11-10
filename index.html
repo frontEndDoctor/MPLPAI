@@ -144,7 +144,7 @@ function ingest(text){
   }));
   const coding=rows.map(o=>{
     const codes={};DIMS.forEach(d=>{const a=((o[d.col]||"")+";"+(o[subCol(d)]||"")).split(/[;,]/).map(s=>s.trim()).filter(x=>x&&x!=="N/A");a.filter(x=>x.length>2).forEach(x=>{if(!a.includes(x.slice(0,2)))a.push(x.slice(0,2))});codes[d.k]=[...new Set(a)]});
-    return{codes,ci:ICOLS.map(c=>{const v=o[c]||"";return v==="N/A"?"":v}),nc:CCOLS.map(k=>!isNA(o[k])),notes:o.annotator_notes||"",evidence:{D1:o.D1_evidence||"",D2:o.D2_evidence||"",D3:o.D3_evidence||"",D4:o.D4_evidence||""}};
+    return{codes,ci:ICOLS.map(c=>{const v=o[c]||"";return v==="N/A"?"":v}),nc:CCOLS.map(k=>!isNA(o[k])),notes:o.annotator_notes||""};
   });
   S={headers,rows,coding,cur:0,multi:S.multi||{D1:true},defs:S.defs||{},annotator:""};save();$("who").value="";updateExp();render();say(`Loaded ${rows.length} posts from Annotator 1 CSV.`);
 }
@@ -162,7 +162,7 @@ function renderMain(){
   const m=$("main");
   if(!S.rows.length){m.innerHTML=`<div class="empty"><h2 style="font-size:18px;color:var(--ink)">Upload your CSV to start coding</h2><p>The file needs a <b>post_text</b> or <b>text</b> column. It can also have platform, top_comment_1–3 and code columns.</p><button class="primary" id="up2">Choose CSV file</button></div>`;return}
   const r=S.rows[S.cur],c=S.coding[S.cur];
-  let h=`<div class="meta">${r.subreddit?`<span>r/${esc(r.subreddit)}</span>`:""}<span style="margin-left:auto" class="row"><button data-nav="-1">Prev</button><button data-nav="1" class="primary">Next</button></span></div>
+  let h=`<div class="meta"><span style="margin-left:auto" class="row"><button data-nav="-1">Prev</button><button data-nav="1" class="primary">Next</button></span></div>
   <p class="post">${esc(r.text)}</p>
   <div id="dims" style="border-top:1px solid var(--line);padding-top:12px;margin-bottom:4px"></div>`;
   c.ci=c.ci||["","",""];
@@ -181,7 +181,7 @@ function renderSide(){
   const c=S.coding[S.cur];
   s.innerHTML=RULES+DIMS.map(d=>{
     const multi=!!S.multi[d.k],sel=c.codes[d.k]||[];
-    return `<div class="dim"><div class="hd"><span>${d.title}</span><label><input type="checkbox" data-multi="${d.k}" ${multi?"checked":""}> multiple</label></div><div class="chips">${d.codes.map(([id,l,sub])=>`<button class="chip ${sub?"sub":""} ${sel.includes(id)?"on":""}" data-d="${d.k}" data-v="${id}" title="${esc(def(id))}">${id} ${l}</button>`).join("")}</div><label for="ev-${d.k}" style="display:block;margin-top:8px;font-size:12px;color:var(--mute)">Evidence for ${d.k}</label><textarea id="ev-${d.k}" data-evidence="${d.k}" placeholder="Quote or describe the text supporting this code">${esc((c.evidence||{})[d.k]||"")}</textarea></div>`;
+    return `<div class="dim"><div class="hd"><span>${d.title}</span><label><input type="checkbox" data-multi="${d.k}" ${multi?"checked":""}> multiple</label></div><div class="chips">${d.codes.map(([id,l,sub])=>`<button class="chip ${sub?"sub":""} ${sel.includes(id)?"on":""}" data-d="${d.k}" data-v="${id}" title="${esc(def(id))}">${id} ${l}</button>`).join("")}</div></div>`;
   }).join("");
 }
 function go(n){S.cur=Math.min(S.rows.length-1,Math.max(0,S.cur+n));save();render();$("main").scrollTop=0;window.scrollTo(0,0)}
@@ -204,7 +204,7 @@ document.addEventListener("change",e=>{
   if(t.id==="todo")return renderList();
   if(t.dataset.multi){S.multi[t.dataset.multi]=t.checked;save()}
  });
-document.addEventListener("input",e=>{const id=e.target.id;const c=S.coding[S.cur];if(id==="notes"){c.notes=e.target.value;save()}else if(e.target.dataset.evidence){c.evidence=c.evidence||{};c.evidence[e.target.dataset.evidence]=e.target.value;save()}});
+document.addEventListener("input",e=>{const id=e.target.id;const c=S.coding[S.cur];if(id==="notes"){c.notes=e.target.value;save()}});
 document.addEventListener("keydown",e=>{
   if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.metaKey||e.ctrlKey||!S.rows.length)return;
   if(e.key==="ArrowRight")go(1);if(e.key==="ArrowLeft")go(-1);
@@ -213,13 +213,13 @@ $("file").onchange=async e=>{const f=e.target.files[0];if(!f)return;ingest(await
 
 function buildCSV(){
   const extra=ICOLS.filter(c=>!S.headers.includes(c));
-  const cols=[...S.headers];
+  const cols=S.headers.filter(c=>!/^D[1-4]_evidence$/.test(c));
   ["annotator_notes","Comment_Available",...DIMS.flatMap(d=>{const l=[d.col,labCol(d)];if(d.codes.some(x=>x[2]))l.push(subCol(d),subLabCol(d));return l})].forEach(c=>{if(!cols.includes(c))cols.push(c)});
   extra.forEach(c=>cols.push(c));
   const q=v=>{v=String(v??"");return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
   const lines=[cols.map(q).join(",")];
   S.rows.forEach((r,i)=>{
-    const c=S.coding[i],ev=c.evidence||{},o={...r,annotator_notes:c.notes,D1_evidence:ev.D1||"",D2_evidence:ev.D2||"",D3_evidence:ev.D3||"",D4_evidence:ev.D4||"",Comment_Available:CCOLS.every(k=>isNA(r[k]))?"No":"Yes"};
+    const c=S.coding[i],o={...r,annotator_notes:c.notes,Comment_Available:CCOLS.every(k=>isNA(r[k]))?"No":"Yes"};
     DIMS.forEach(d=>{const a=c.codes[d.k]||[],pr=a.filter(x=>x.length<3),sb=a.filter(x=>x.length>2);const lb=ids=>ids.map(x=>(d.codes.find(y=>y[0]===x)||[])[1]||x).join(";");o[d.col]=pr.join(";");o[labCol(d)]=lb(pr);if(d.codes.some(x=>x[2])){o[subCol(d)]=sb.length?sb.join(";"):(a.length?"N/A":"");o[subLabCol(d)]=sb.length?lb(sb):(a.length?"N/A":"")}});
     ICOLS.forEach((k,j)=>o[k]=isNA(r[CCOLS[j]])?"N/A":((c.ci&&c.ci[j])||""));
     lines.push(cols.map(k=>q(o[k])).join(","));
